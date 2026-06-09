@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Java IE tour — field guide · Verdhana</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F4F5F7; --card:#FFFFFF; --ink:#16181D; --ink2:#454A53; --muted:#727A86;
+  --hair:#E2E5EA; --hair2:#EDEFF3; --red:#C8102E; --redink:#9E0C24; --redfill:#FBE9EC;
+  --slate:#54607125; --slatefill:#ECF0F4; --slateink:#4B5562;
+  --amber:#8A5A00; --amberfill:#FBF0D6; --amberline:#E7C36A;
+  --pos:#1C7A4A; --neg:#B42318;
+  --d1:#C8102E; --d2:#B5651D; --d3:#3E6B8C; --d4:#3F7A55;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);
+  font-family:"Inter",system-ui,sans-serif;font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.mono{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums}
+.eyebrow{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted)}
+
+/* header */
+header{background:var(--ink);color:#fff;padding:0}
+.hbar{height:5px;background:var(--red)}
+.hwrap{max-width:1180px;margin:0 auto;padding:20px 22px 22px}
+.brand{font-family:"Archivo";font-weight:800;font-size:13px;letter-spacing:.04em;color:#fff;text-transform:uppercase}
+.brand span{color:var(--red)}
+h1{font-family:"Archivo";font-weight:800;font-size:clamp(22px,3.4vw,33px);line-height:1.08;margin:8px 0 4px;letter-spacing:-.01em}
+.hsub{color:#B9BFC9;font-size:13.5px;margin-bottom:14px}
+.hmeta{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:12.5px;color:#C9CED7;border-top:1px solid #2A2D34;padding-top:12px}
+.hmeta b{color:#fff;font-weight:600}
+.master{margin-top:14px;background:#21242B;border-left:3px solid var(--red);padding:12px 14px;border-radius:0 6px 6px 0}
+.master .eyebrow{color:#E79AA6}
+.master p{margin:5px 0 0;font-family:"Archivo";font-weight:600;font-size:15.5px;line-height:1.34;color:#fff}
+
+/* tabs */
+nav{position:sticky;top:0;z-index:30;background:rgba(244,245,247,.93);backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--hair);box-shadow:0 1px 0 rgba(0,0,0,.02)}
+.navwrap{max-width:1180px;margin:0 auto;padding:9px 14px;display:flex;gap:6px;overflow-x:auto;scrollbar-width:thin}
+.navwrap::-webkit-scrollbar{height:5px}.navwrap::-webkit-scrollbar-thumb{background:var(--hair);border-radius:3px}
+.tab{flex:0 0 auto;border:1px solid var(--hair);background:var(--card);border-radius:8px;
+  padding:7px 12px;cursor:pointer;text-align:left;min-width:96px;transition:border-color .15s,transform .1s;color:var(--ink)}
+.tab:hover{border-color:#C4C9D1}
+.tab .dlab{font-family:"IBM Plex Mono",monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:1px}
+.tab .tname{font-family:"Archivo";font-weight:700;font-size:13px;line-height:1.12;display:block}
+.tab .tmeta{font-family:"IBM Plex Mono",monospace;font-size:10px;color:var(--muted);display:block;margin-top:2px}
+.tab[aria-selected="true"]{border-color:var(--red);box-shadow:inset 0 -2.5px 0 var(--red)}
+.tab[aria-selected="true"] .tname{color:var(--redink)}
+.tab.ov[aria-selected="true"]{box-shadow:inset 0 -2.5px 0 var(--ink);border-color:var(--ink)}
+.tab.ov[aria-selected="true"] .tname{color:var(--ink)}
+.tab:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+.dtick{display:inline-block;width:7px;height:7px;border-radius:2px;margin-right:5px;vertical-align:middle}
+.d1{background:var(--d1)}.d2{background:var(--d2)}.d3{background:var(--d3)}.d4{background:var(--d4)}
+
+main{max-width:1180px;margin:0 auto;padding:22px 14px 80px}
+.panel{display:none;animation:fade .25s ease}
+.panel.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.panel.active{animation:none}.panel{transition:none}}
+
+/* entity header */
+.ehead{background:var(--card);border:1px solid var(--hair);border-radius:12px;padding:18px 20px;margin-bottom:16px;position:relative;overflow:hidden}
+.ehead:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--red)}
+.ehead.k-corp:before{background:var(--d3)}
+.etop{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px 14px}
+.ename{font-family:"Archivo";font-weight:800;font-size:clamp(20px,2.6vw,26px);letter-spacing:-.01em;margin:0}
+.ticker{font-family:"IBM Plex Mono",monospace;font-size:12px;color:#fff;background:var(--ink);padding:3px 8px;border-radius:5px}
+.ticker.unl{background:var(--slateink)}
+.pill{font-family:"IBM Plex Mono",monospace;font-size:11px;padding:3px 8px;border-radius:5px;border:1px solid var(--hair);color:var(--muted)}
+.pill.corp{color:var(--d3);border-color:#BCD0DF;background:#EEF4F8}
+.eloc{font-size:13px;color:var(--ink2);margin:9px 0 2px}
+.eloc b{color:var(--ink)}
+.epos{font-size:13.5px;color:var(--ink2);margin:6px 0 0;max-width:74ch}
+.oneq{margin-top:13px;background:var(--amberfill);border:1px solid var(--amberline);border-radius:8px;padding:10px 13px}
+.oneq .eyebrow{color:var(--amber)}
+.oneq p{margin:3px 0 0;font-family:"Archivo";font-weight:600;font-size:15px;line-height:1.3}
+
+/* section sub-nav */
+.subnav{display:flex;gap:6px;margin:0 0 14px;flex-wrap:wrap}
+.subbtn{font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;
+  border:1px solid var(--hair);background:var(--card);color:var(--ink2);border-radius:7px;padding:7px 12px;cursor:pointer}
+.subbtn[aria-selected="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.subbtn:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+
+.block{display:none}.block.show{display:block}
+.grid2{display:grid;grid-template-columns:1.45fr 1fr;gap:16px}
+@media(max-width:760px){.grid2{grid-template-columns:1fr}}
+
+.card{background:var(--card);border:1px solid var(--hair);border-radius:12px;padding:16px 18px;margin-bottom:16px}
+.card h3{font-family:"Archivo";font-weight:700;font-size:13px;letter-spacing:.02em;text-transform:uppercase;color:var(--ink);margin:0 0 12px;display:flex;align-items:center;gap:8px}
+.card h3:before{content:"";width:14px;height:2.5px;background:var(--red);display:inline-block}
+
+/* fin table */
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+.ftab th,.ftab td{text-align:right;padding:7px 8px;border-bottom:1px solid var(--hair2)}
+.ftab th:first-child,.ftab td:first-child{text-align:left}
+.ftab thead th{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--muted);font-weight:500;border-bottom:1.5px solid var(--hair);letter-spacing:.03em}
+.ftab td.l{font-weight:500;color:var(--ink)}
+.ftab td.num{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;color:var(--ink2)}
+.ftab td.num.last{color:var(--ink);font-weight:600}
+.ftab tr:last-child td{border-bottom:none}
+.rnote{font-size:11.5px;color:var(--muted);margin-top:2px;line-height:1.3}
+td.neg{color:var(--neg)}
+.unit{font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--muted);float:right;font-weight:400;letter-spacing:.02em}
+
+/* valuation grid */
+.vgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--hair2);border:1px solid var(--hair2);border-radius:9px;overflow:hidden}
+.vcell{background:var(--card);padding:9px 11px}
+.vcell .vl{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.vcell .vv{font-family:"Archivo";font-weight:700;font-size:15px;margin-top:2px}
+.vcell.verify{background:#FFFBEF}
+.vcell.verify .vv{color:var(--amber)}
+.vcell.verify .vl:after{content:" ·verify";color:var(--amberline);font-weight:600}
+.meta-line{font-size:12.5px;color:var(--ink2);margin-top:11px;line-height:1.45}
+.meta-line.hold{border-top:1px dashed var(--hair);padding-top:9px;margin-top:11px}
+.meta-line b{color:var(--ink)}
+
+/* facts */
+ul.facts{list-style:none;margin:0;padding:0}
+ul.facts li{position:relative;padding:7px 0 7px 18px;border-bottom:1px solid var(--hair2);font-size:13.5px;color:var(--ink2);line-height:1.45}
+ul.facts li:last-child{border-bottom:none}
+ul.facts li:before{content:"";position:absolute;left:2px;top:13px;width:5px;height:5px;background:var(--red);border-radius:1px}
+
+/* baseline then/now */
+.bn{display:grid;grid-template-columns:130px 1fr 1fr;gap:0;font-size:13px}
+.bn .bh{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);padding:0 10px 6px;border-bottom:1.5px solid var(--hair)}
+.bn .bl{font-weight:500;padding:9px 10px;border-bottom:1px solid var(--hair2);color:var(--ink)}
+.bn .bt{padding:9px 10px;border-bottom:1px solid var(--hair2);color:var(--slateink);background:var(--slatefill)}
+.bn .bnow{padding:9px 10px;border-bottom:1px solid var(--hair2);color:var(--redink);font-weight:500;position:relative}
+.bn .bnow:before{content:"→";position:absolute;left:-1px;top:9px;color:var(--red);font-weight:700}
+.bn .bnow{padding-left:18px}
+@media(max-width:620px){.bn{grid-template-columns:1fr}.bn .bh.x{display:none}.bn .bl{background:var(--ink);color:#fff;border-radius:6px 6px 0 0}.bn .bt{border-radius:0}.bn .bnow{border-radius:0 0 6px 6px;margin-bottom:8px}}
+
+/* questions */
+.qtheme{font-family:"Archivo";font-weight:700;font-size:12.5px;letter-spacing:.03em;text-transform:uppercase;color:var(--redink);margin:18px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--hair)}
+.qtheme:first-child{margin-top:0}
+.qitem{border:1px solid var(--hair);border-radius:9px;margin-bottom:9px;overflow:hidden;background:var(--card)}
+.qrow{display:flex;gap:10px;padding:11px 13px;cursor:pointer;align-items:flex-start}
+.qrow:hover{background:#FAFBFC}
+.qnum{font-family:"IBM Plex Mono",monospace;font-weight:600;color:var(--red);font-size:13px;flex:0 0 auto;margin-top:1px;width:16px}
+.qtext{flex:1;font-size:14px;line-height:1.42;color:var(--ink)}
+.qbase{display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--amber);background:var(--amberfill);border:1px solid var(--amberline);padding:1px 6px;border-radius:4px;margin-top:5px}
+.qcap{display:none;padding:0 13px 12px 39px}
+.qcap.open{display:block}
+.qcap textarea{width:100%;border:1px solid var(--hair);border-radius:7px;padding:8px 10px;font-family:"Inter";font-size:13px;color:var(--ink);resize:vertical;min-height:46px;background:#FCFCFD}
+.qcap textarea:focus{outline:2px solid var(--red);outline-offset:0;border-color:var(--red)}
+.qcap .clabel{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin:0 0 4px}
+.chev{flex:0 0 auto;color:var(--muted);transition:transform .18s;margin-top:2px}
+.qrow[aria-expanded="true"] .chev{transform:rotate(90deg)}
+.savedot{flex:0 0 auto;width:7px;height:7px;border-radius:50%;background:var(--pos);margin-top:6px;opacity:0;transition:opacity .2s}
+.qitem.hasnote .savedot{opacity:1}
+
+/* observe + caveat */
+.observe{background:#F2F6FA;border:1px solid #D4E2EC;border-radius:9px;padding:12px 15px;margin-top:4px}
+.observe .eyebrow{color:var(--d3)}
+.observe ul{margin:6px 0 0;padding-left:18px}.observe li{font-size:13px;color:var(--ink2);margin:3px 0}
+.caveat{background:var(--amberfill);border:1px solid var(--amberline);border-radius:9px;padding:11px 14px;margin-bottom:14px;font-size:13px;color:#6B4700;line-height:1.45}
+.caveat b{color:#5A3C00}
+.catalyst{background:var(--redfill);border:1px solid #EBB9C2;border-radius:9px;padding:11px 14px;margin-bottom:14px;font-size:13px;color:#7A0C20;line-height:1.45}
+.catalyst .eyebrow{color:var(--redink)}
+
+/* overview */
+.ovgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:18px}
+.fwcard{background:var(--card);border:1px solid var(--hair);border-radius:10px;padding:13px 15px}
+.fwcard h4{font-family:"Archivo";font-weight:700;font-size:12.5px;color:var(--redink);margin:0 0 7px}
+.fwcard ul{margin:0;padding-left:16px}.fwcard li{font-size:12.5px;color:var(--ink2);margin:4px 0;line-height:1.38}
+.spine{width:100%;border-collapse:collapse;font-size:13px;background:var(--card);border:1px solid var(--hair);border-radius:12px;overflow:hidden}
+.spine th{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);text-align:left;padding:10px;border-bottom:1.5px solid var(--hair);background:#FAFBFC}
+.spine td{padding:11px 10px;border-bottom:1px solid var(--hair2);vertical-align:top}
+.spine tr:last-child td{border-bottom:none}
+.spine .snm{font-family:"Archivo";font-weight:700;font-size:13.5px;cursor:pointer;color:var(--ink)}
+.spine .snm:hover{color:var(--redink)}
+.spine .stk{font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--muted);display:block;margin-top:1px}
+.spine .soneq{font-size:12.5px;color:var(--redink);font-weight:500}
+.spine .shead{font-size:12.5px;color:var(--ink2)}
+.daychip{font-family:"IBM Plex Mono",monospace;font-size:10px;padding:2px 6px;border-radius:4px;color:#fff;white-space:nowrap}
+
+/* toolbar */
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
+.btn{font-family:"IBM Plex Mono",monospace;font-size:12px;border:1px solid var(--hair);background:var(--card);color:var(--ink);border-radius:7px;padding:8px 13px;cursor:pointer;letter-spacing:.02em}
+.btn:hover{border-color:#C4C9D1}
+.btn.primary{background:var(--ink);color:#fff;border-color:var(--ink)}
+.btn:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+.tbnote{font-size:11.5px;color:var(--muted);font-family:"IBM Plex Mono",monospace}
+
+.ovhead{font-family:"Archivo";font-weight:800;font-size:18px;margin:22px 0 12px;letter-spacing:-.01em}
+.ovhead:first-child{margin-top:0}
+footer{max-width:1180px;margin:0 auto;padding:0 14px 40px;color:var(--muted);font-size:11.5px;line-height:1.5}
+footer .eyebrow{margin-bottom:5px;display:block}
+@media print{nav{position:static}.tab{display:none}.subnav,.toolbar{display:none}.block{display:block!important}.panel{display:block!important}.qcap{display:block!important}}
+</style>
+</head>
+<body>
+<header>
+  <div class="hbar"></div>
+  <div class="hwrap">
+    <div class="brand">VERDHANA<span>·</span>EQUITY STRATEGY</div>
+    <h1 id="h1"></h1>
+    <div class="hsub" id="hsub"></div>
+    <div class="hmeta">
+      <span><b>Analysts</b> <span id="hanalysts"></span></span>
+      <span><b>Estates</b> KIJA · BEST · KITB · Kendal · JIIPE</span>
+      <span><b>Corporate</b> AVIA · WIIM · PWON</span>
+    </div>
+    <div class="master">
+      <div class="eyebrow">Master question — falsification, not data-gathering</div>
+      <p id="hmaster"></p>
+    </div>
+  </div>
+</header>
+
+<nav><div class="navwrap" id="tabs" role="tablist"></div></nav>
+
+<main id="main"></main>
+
+<footer>
+  <span class="eyebrow">Sources & basis</span>
+  Compiled from company FY25 results, 1Q26 / 1H25 quarterlies, annual reports, investor decks and IDX filings (through Jun 2026), against the 14-Apr-2023 Verdhana industrial-estates postcard. Figures in IDR bn unless noted; rounded. Share prices flagged "verify" move daily — confirm on the day. KIT Batang is unlisted: its six headline financials are preliminary/unverified — request audited statements on site. KIJA & PWON net profit shown both total and owners' share. Notes you capture are stored on this device only; export before clearing browser data.
+</footer>
+
+<script>
+
+// Field guide data — Verdhana Java IE tour, 9-12 Jun 2026
+// IDR bn unless noted. Figures from FY25 results, 1Q26 quarterlies, ARs and research pack.
+const TRIP = {
+  title: "Java industrial estates — site-visit field guide",
+  sub: "Verdhana Explore tour · 9–12 June 2026 · Jakarta → Semarang → Surabaya",
+  analysts: "Jupriadi Tan · Gerald Hugo",
+  master: "What single constraint caps growth over 3 years — and is it funded, permitted and on the ground today, or just a plan?"
+};
+
+const FRAMEWORK = [
+  ["1 · Demand truth", ["Binding/deposited (PPJB) vs MOU/LOI in the pipeline?","MOU-to-paid conversion, historically?","Repeat vs first-time buyers?"]],
+  ["2 · Gating utility", ["Committed vs available vs contracted MW? Captive or PLN; margin-bearing or passthrough?","DC angle: water + fibre headroom?","Answered in MW and dates, or in adjectives?"]],
+  ["3 · Land economics", ["All-in cost/sqm to ready the next tranche?","Net ASP after rebates (not the sticker); legacy vs new basis?"]],
+  ["4 · Cash, not accrual", ["Operating cash flow vs earnings? Land capex + working-capital drag?","Instalment receivables — size, ageing?"]],
+  ["5 · Recurring quality", ["% take-or-pay / contracted? Escalation — USD or CPI?","Incremental margin per hectare?"]],
+  ["6 · Concentration & 'why here'", ["Tenant credit; export vs domestic; anchor weight?","Why you over the estate 30 min away? Numbers if the anchor slips?"]],
+  ["7 · Capital & incentives", ["Cash: reinvest (hurdle?), return, or parked?","Deals closing on incentives, or anyway?"]]
+];
+
+const ENTITIES = [
+  // ---------------- DAY 1 ----------------
+  {
+    id:"kija", name:"KI Jababeka", ticker:"KIJA IJ", listed:true,
+    day:1, time:"09:00–11:00", kind:"estate",
+    location:"Kota Jababeka, Cikarang, Bekasi",
+    positioning:"Mature Greater-Jakarta core + Kendal frontier JV + own power & dry port. Reports quarterly; 1Q26 available.",
+    oneQ:"Next Cikarang land tranche — contracted, or aspirational?",
+    snapshot:{
+      cols:["FY23","FY24","FY25","1Q26"],
+      rows:[
+        {l:"Total revenue", v:["~4,031","4,602.6","5,149.4","1,192"], n:"FY25 +11.9%; 1Q26 vs 1,291 in 1Q25"},
+        {l:"Gross profit", v:["–","1,967.2","2,033.0","–"], n:"FY25 GM 39.5%"},
+        {l:"Adj. EBITDA", v:["–","1,339.8","1,402.2","–"], n:"FY25 margin 27.2%"},
+        {l:"Net profit (total)", v:["–","770.0","857.1","–"], n:"+11.3%; narrower FX loss"},
+        {l:"Net profit (owners)", v:["–","363.3","423.2","164.0"], n:"EPS 20.3; 1Q26 vs 200.5 — softer"},
+        {l:"Recurring % rev", v:["~44%","41%","50%","55%"], n:"infra income rising"}
+      ]
+    },
+    valuation:[
+      {l:"Share price", v:"~Rp200", verify:true},
+      {l:"Shares (m)", v:"20,825"},
+      {l:"Market cap", v:"~Rp4,165bn"},
+      {l:"P/B", v:"~0.51x"}, {l:"BVPS", v:"Rp391"},
+      {l:"P/E (TTM)", v:"~9.8x"}
+    ],
+    balance:"12M25: cash Rp3,619bn · total assets Rp15,056bn · total debt ~Rp6,912bn · equity Rp8,144bn · net debt ~Rp3,290bn · ND/E ~0.40x.",
+    holders:"Mu'min Ali Gunawan (Panin) 21.1% · Islamic Development Bank 11.5% · treasury ~1.4% · public ~66%.",
+    facts:[
+      "Group marketing sales FY25 Rp3.6tn — record, +13%, beat Rp3.5tn target. FY26 target Rp3.75tn (Cikarang 1.25tn / Kendal 2.5tn).",
+      "Cikarang FY25 Rp1.1tn / 21.2ha (+5%). Recurring infrastructure income = 50% of FY25 revenue (vs 41% FY24).",
+      "Power segment revenue Rp1.81tn (from Rp1.17tn). Bekasi Power: 130MW gas CCGT; 118.8MW to PLN on 20-yr PPA to 2031; fuel passthrough; ~25% take-or-pay.",
+      "Cikarang Dry Port FY25 revenue Rp234.8bn (from Rp257.1bn) on lower TEU.",
+      "Land bank: Kota Jababeka 1,295ha · Kendal 416ha · Tanjung Lesung 1,481ha · Morotai 1,885ha.",
+      "US$185.9m Senior Notes mature 2027; call-spread hedges in place."
+    ],
+    baseline:[
+      {l:"Group marketing sales", then:"FY23 Rp2.21tn", now:"FY25 Rp3.6tn (record)"},
+      {l:"Kendal marketing sales", then:"FY23 Rp1.24tn", now:"FY25 Rp2.51tn (~70% of group)"},
+      {l:"Recurring % of revenue", then:"~44% (2023 mix)", now:"50% (FY25)"},
+      {l:"Power", then:"own 130MW gas plant (2023)", now:"segment revenue Rp1.81tn FY25"}
+    ],
+    questions:[
+      {theme:"A · Power & infrastructure edge", items:[
+        {q:"Bekasi Power 118.8MW to PLN to 2031 — renewal plan, and spare capacity for DC / high-load tenants in Cikarang?"},
+        {q:"Power-segment GP margin fell 23% (1Q25) → 6% (1Q26) — gas-cost / passthrough timing, or structural?", base:"1Q26 23%→6%"}
+      ]},
+      {theme:"B · Cikarang core & balance sheet", items:[
+        {q:"Remaining saleable land in Kota Jababeka and absorption runway?"},
+        {q:"Dry Port throughput −15% in FY25 — structural shift or cyclical?"},
+        {q:"US$185.9m senior notes mature 2027 — refinancing plan; how do the call-spread hedges sit?"},
+        {q:"Cash ~Rp3.6tn but a large share at JV level — what is upstreamable to holdco?"}
+      ]}
+    ],
+    observe:["Dry-port container activity vs the FY25 decline.","Tenant factories live vs idle along the core road."]
+  },
+  {
+    id:"best", name:"Bekasi Fajar", ticker:"BEST IJ", listed:true,
+    day:1, time:"13:30–15:00", kind:"estate",
+    location:"MM2100, Cikarang Barat · meet Ibu Rika Mandasari, BeFa Square",
+    positioning:"Mature MM2100 core. Deepest trough of the listed estates; recovery rests on the data-centre cluster converting.",
+    oneQ:"Committed MW addition vs DMAS's headroom + 993MW PLN DC MoU?",
+    snapshot:{
+      cols:["FY24","FY25","1H25"],
+      rows:[
+        {l:"Total revenue", v:["457.6","427.1","94.3"], n:"FY25 −6.7%; 1H25 −50.5% YoY"},
+        {l:"Net profit", v:["58.6","30.1","−58.5"], n:"FY25 −47.6%; 1H25 swung to net loss"}
+      ]
+    },
+    valuation:[
+      {l:"Share price", v:"~Rp101", verify:true},
+      {l:"Shares (m)", v:"9,647"},
+      {l:"Market cap", v:"~Rp975bn"},
+      {l:"P/B", v:"below book"},
+      {l:"Dividend", v:"none"},
+      {l:"ATL", v:"Rp74 (Apr-25)"}
+    ],
+    balance:"3M26: total assets Rp5,806bn · cash Rp371bn · bank loans Rp1,117bn · equity Rp4,465bn · net debt Rp746bn · ND/E 0.17x · current ratio 5.6x.",
+    holders:"Argo Manunggal Land Development 48.1% · Nomura Singapore 10% (custodian reassignment from Daiwa House, Aug-2025 — not a sale) · public ~41.8%.",
+    facts:[
+      "MM2100 ~1,700ha developed; 350–400 firms from ~18 countries (Astra Honda, Panasonic).",
+      "Water treatment 72,000 m³/day; wastewater 45,000 m³/day; power via PLN + Cikarang Listrindo.",
+      "Logistics warehouse occupancy hit 100% in 1Q26 (Jabodetabek ~95%).",
+      "2026 demand pipeline ~70ha — data centre, logistics/warehousing (incl. cold storage), electronics, F&B. 2026 target Rp600bn land + SFB sales.",
+      "BeFa Industrial Hub SFB units; 78ha 'BeFa digital ground' DC cluster (customers BCA, DCI, NTT)."
+    ],
+    baseline:[
+      {l:"Power vs demand", then:"620MW vs 555MW (2023); no committed addition", now:"verify MW added on visit"},
+      {l:"Electricity model", then:"zero-margin passthrough (POWR + PLN)", now:"any path to margin-bearing?"},
+      {l:"Water", then:"72,000 m³/day, ~50% util (2023)", now:"headroom for DC cooling?"},
+      {l:"DC tenants (named 2023)", then:"BCA, DCI, NTT", now:"live / expanded? new signings?"},
+      {l:"Sales conversion", then:"laggard vs listed peers (2023)", now:"FY25 NP Rp30bn; 1H25 net loss"}
+    ],
+    questions:[
+      {theme:"A · Power — the gating item", items:[
+        {q:"What MW has actually been added since 620 vs 555, and how does headroom compare to DMAS's ~5x cushion + 993MW PLN DC MoU?", base:"620MW vs 555MW (2023)"},
+        {q:"Any path from zero-margin passthrough to margin-bearing power supply?"},
+        {q:"Water 72,000 m³/day at ~50% util — enough for data-centre cooling load?"}
+      ]},
+      {theme:"B · Data-centre cluster", items:[
+        {q:"78ha BeFa digital ground (BCA/DCI/NTT 2023) — what is live today, and what new DC signings are in the pipeline?"},
+        {q:"Next DC land tranche contracted or aspirational, and is power the gating item?"}
+      ]},
+      {theme:"C · Sales conversion & RNAV", items:[
+        {q:"FY25 NP halved and 1H25 swung to a loss — timing slippage or a structural conversion problem vs peers?", base:"FY25 NP Rp30bn"},
+        {q:"BeFa Industrial Hub SFB — take-up and build-out plan?"},
+        {q:"At a deep discount to book, what closes the RNAV gap?"}
+      ]}
+    ],
+    observe:["Is the DC ground real site works, or still graded land?","Toll-to-gate timing vs the 2023 '15–20 min'."]
+  },
+  // ---------------- DAY 2 ----------------
+  {
+    id:"kitb", name:"KIT Batang", ticker:"unlisted · state JV", listed:false,
+    day:2, time:"08:30–10:30", kind:"estate",
+    location:"KEK Industropolis Batang, Gringsing, Central Java",
+    positioning:"State JV under Danareksa/Danantara. SEZ since Mar-2025; the structural FDI-capture story, PMN-funded low land basis.",
+    oneQ:"Post-KEK pipeline real — and do margins hold as cheap PMN land depletes?",
+    caveat:"The six headline financials below are PRELIMINARY/UNVERIFIED (likely from a Pefindo or Danareksa report). Request the audited FY24 statements on site. All structural and tenant figures are confirmed.",
+    snapshot:{
+      cols:["FY23","FY24"],
+      rows:[
+        {l:"Revenue", v:["~573.7","~715.7"], n:"unverified"},
+        {l:"Net profit", v:["~208.1","~281.8"], n:"unverified"},
+        {l:"Net margin", v:["~36%","~39%"], n:"PMN-funded cheap land"},
+        {l:"Adj. EBITDA", v:["~270.1","~305.4"], n:"unverified"},
+        {l:"Total assets", v:["~1,660.9","~2,038.4"], n:"unverified"},
+        {l:"Total equity", v:["~1,509","~1,864.5"], n:"near-zero leverage"}
+      ]
+    },
+    valuation:[
+      {l:"Listing", v:"unlisted"},
+      {l:"PT KIW (Danareksa)", v:"96.59%"},
+      {l:"Others", v:"3.41%"},
+      {l:"Shares (m)", v:"1,027"},
+      {l:"PMN (2021)", v:"Rp977bn"},
+      {l:"Danamon loan", v:"Rp786bn (Nov-23)"}
+    ],
+    balance:"PMN state capital injection Rp977bn to KIW (2021), in-kind to KITB. Folding into the new 'Kawasan Industri Indonesia' holding under Danantara (restructuring to complete 2026, full operation 2027).",
+    holders:"PT KIW (Danareksa Holding) 96.59% (992m sh) · PT PP 1.6% + PTPN IX 1.22% + Batang Regency 0.49% (35m sh). NOT listed; no public float.",
+    facts:[
+      "KEK status granted by PP 12/2025, inaugurated 20-Mar-2025 — the only Indonesian SEZ integrating Industry, Logistics & Tourism.",
+      "Total area 4,300ha; KEK zone 2,886.7ha; Phase 1 (450ha) sold out; Phase 2 (~1,000ha) land clearing; ~40m elevation, flood-free.",
+      "Tenant ramp: Oct-24 21/~Rp16tn → Mar-25 27/Rp17.95tn → Nov-25 35+/~Rp22.5tn (8 operating). 2025 new investment ~Rp4.87tn / 93.67ha / 12 tenants.",
+      "Post-KEK projections: +Rp75.8tn investment, ~58k jobs over 5yr, up to 250k at full build; 5-yr SEZ target Rp60tn.",
+      "KCC Glass (Korea): 46ha, Rp4tn + Rp8tn planned — KCC's largest plant worldwide; ~2,000 jobs; ~80% export; gas 8,000 BBTUD @ US$6/MMBTU.",
+      "SEG Solar (US): 41.32ha, US$500m, largest integrated PV plant in SE Asia (5GW); Phase 1 operational Aug-2025.",
+      "Others: Wavin (PVC), Yih Quan, RKI ceramics (1,350 BBTUD gas), LBM (EV battery), Ace Medical, Samator, SUG Solar.",
+      "Power from PLN; access via Trans-Java toll + Pantura + rail; 10 worker-housing towers."
+    ],
+    baseline:[
+      {l:"KEK status", then:"not yet (2023)", now:"granted Mar-2025"},
+      {l:"Phase 1 (450ha)", then:"13 tenants / 183ha under construction (2023)", now:"sold out (2025)"},
+      {l:"Anchor", then:"KCC Glass = first major tenant (2023)", now:"KCC operating + SEG Solar 2nd anchor"},
+      {l:"Phase-1 price", then:"~IDR800–950k/sqm (2023)", now:"confirm Phase-2 ASP"}
+    ],
+    questions:[
+      {theme:"A · Land, phasing & KEK", items:[
+        {q:"Phase 2 (1,000ha) — how much pre-committed vs speculative, and ASP vs Phase 1?"},
+        {q:"With KEK status, what incentives are actually closing deals that wouldn't close otherwise?"},
+        {q:"Post-KEK +Rp75.8tn — how much is signed PPTI vs LOI vs aspiration? Rp22.5tn committed but only 8 of 35+ operating.", base:"Rp22.5tn committed, 8 operating"}
+      ]},
+      {theme:"B · Margins, capital & returns", items:[
+        {q:"FY24 net margin ~39% on PMN-funded land — sustainable as Phase-2 basis rises?"},
+        {q:"Return / dividend expectation to the state, and the Danantara consolidation impact on the capital plan?"},
+        {q:"Any path to monetisation or IPO, or wholly state-held?"},
+        {q:"Please share the audited FY24 financial statements — the public headline figures are unverified."}
+      ]},
+      {theme:"C · Anchors, energy & competition", items:[
+        {q:"KCC + SEG dominate — diversification, any downstreaming / hilirisasi linkage, and KCC's Rp8tn second-phase timing?"},
+        {q:"KCC HGBT gas US$6/MMBTU — allocation secure and extendable to new tenants? Power source/plan?"},
+        {q:"Why does a China+1 tenant choose Batang over Kendal or JIIPE?"}
+      ]}
+    ],
+    observe:["Phase-2 clearing: earthworks underway, or untouched?","KCC / SEG construction progress vs press claims."]
+  },
+  {
+    id:"kendal", name:"Kendal Industrial Park", ticker:"KIJA JV · 51/49 Sembcorp", listed:true,
+    day:2, time:"13:00–15:00", kind:"estate",
+    location:"Kawasan Industri Kendal, Brangsong, Kendal",
+    positioning:"KIJA's frontier engine — ~70% of group sales, ~89% foreign (China+1). Financials roll up into KIJA group.",
+    oneQ:"China+1 order durability and ASP trend — how much of the Rp2.5tn target is contracted?",
+    snapshot:{
+      cols:["FY24","FY25","FY26 tgt"],
+      rows:[
+        {l:"Kendal marketing sales", v:["–","2,509","2,500"], n:"~70% of group; +17% YoY"},
+        {l:"Kendal land sold (ha)", v:["–","142","–"], n:"~89% foreign (China/HK/Taiwan)"},
+        {l:"KIJA group net profit", v:["770.0","857.1","–"], n:"total; owners' share Rp423bn (gap ≈ Sembcorp 49%)"}
+      ]
+    },
+    valuation:[
+      {l:"Listed via", v:"KIJA IJ"},
+      {l:"JV", v:"KIJA 51% / Sembcorp 49%"},
+      {l:"Kendal land bank", v:"416ha"},
+      {l:"Tenants", v:"139 (57 op/36 UC/46 D&P)"},
+      {l:"SEZ", v:"yes"},
+      {l:"Port", v:"Tanjung Emas ~25km"}
+    ],
+    balance:"Rolls into KIJA group balance sheet (see KI Jababeka tab). United Power resells PLN at Kendal.",
+    holders:"Via KIJA IJ. Kendal JV: KIJA 51% / Sembcorp 49% — minority interest explains the gap between total and owners' net profit.",
+    facts:[
+      "Kendal FY25 marketing sales Rp2.51tn / 142ha (+17% YoY), ~70% of KIJA group; foreign investors ~89% (China/HK/Taiwan).",
+      "FY26 Kendal marketing-sales target Rp2.5tn.",
+      "China+1 battery + building-materials engine; 139 tenants (57 operating / 36 under construction / 46 design & planning).",
+      "United Power (Kendal) buys and resells PLN power.",
+      "Connectivity: Tanjung Emas port ~25km; SEZ industrial status."
+    ],
+    baseline:[
+      {l:"Kendal marketing sales", then:"FY23 Rp1.24tn", now:"FY25 Rp2.51tn"},
+      {l:"Engine", then:"early frontier ramp (2023)", now:"China+1 battery + building materials"},
+      {l:"Tenants", then:"early absorption (2023)", now:"139 (57 operating)"}
+    ],
+    questions:[
+      {theme:"A · Frontier demand", items:[
+        {q:"Kendal ~70% of FY25 sales; FY26 target Rp2.5tn — contracted vs pipeline split?"},
+        {q:"Durability of the China+1 order book (battery, building materials) given tariff / policy shifts?"},
+        {q:"Kendal ASP vs Cikarang, and JV economics with Sembcorp (49%)?"}
+      ]},
+      {theme:"B · Power & utilities", items:[
+        {q:"United Power buys-and-resells PLN — margin model and scalability with absorption?"},
+        {q:"Spare capacity / plan for high-load (DC, battery) tenants at Kendal?"}
+      ]}
+    ],
+    observe:["Operating vs under-construction tenant count on the ground (claimed 57 operating).","Tanjung Emas port access (~25km) in practice."]
+  },
+  // ---------------- DAY 3 ----------------
+  {
+    id:"avia", name:"Avia Avian", ticker:"AVIA IJ", listed:true,
+    day:3, time:"11:30–13:45", kind:"corp",
+    location:"Avian Innovation Centre, Sidoarjo",
+    positioning:"Corporate call — not an industrial estate. Market-leading decorative paint; net cash, high payout.",
+    oneQ:"Volume vs price — how much of growth is real volume / share gain vs ASP, and is it holding into 2026?",
+    snapshot:{
+      cols:["FY24","FY25","9M25"],
+      rows:[
+        {l:"Revenue", v:["~7,470","8,120","5,900"], n:"FY25 +8.7%; volume +7.4%"},
+        {l:"Net profit", v:["1,660","1,740","1,180"], n:"NPM 21.5% FY25"},
+        {l:"EPS (Rp)", v:["27.2","28.2","–"], n:"ROE 18.3%"},
+        {l:"GM (Q3-25)", v:["–","42.6%","–"], n:"EBITDA margin 24.4%"}
+      ]
+    },
+    valuation:[
+      {l:"Share price", v:"~Rp380", verify:true},
+      {l:"Market cap", v:"~Rp23.4tn"},
+      {l:"P/E", v:"~16.7x"},
+      {l:"Balance", v:"net cash"},
+      {l:"Dividend", v:"Rp23/sh, 78% payout"},
+      {l:"Yield", v:"~6%"}
+    ],
+    balance:"Net cash. Capex FY25 Rp484bn (~6% of sales); FY26 5–6%. Ongoing share buyback after completing a prior 1.4bn-share programme.",
+    holders:"Controlled by the Tanoko family (Tancorp / Hermanto Tanoko).",
+    facts:[
+      "~26% decorative-paint market share (leader); competitors Nippon Paint, Mowilex, Propan, Jotun.",
+      "Distribution: ~58–59k building-material stores, 182 distribution centres, ~9k employees, all 38 provinces; ~12k daily deliveries, ~92% one-day fulfilment.",
+      "Brands: Avitex, Avian, No Drop (waterproofing), Lenkote, Giant Mortar, Absolute. Wall segment drove double-digit growth; share-gain strategy compressed margin ~2%.",
+      "Third factory (Cirebon, 11ha, 200–225k MT/yr) commissioning early 2026; year-1 utilisation ~100k MT.",
+      "Raw-material exposure: TiO2, resins. ASCO retail collaboration (250+ stores) launched Sep-2025."
+    ],
+    baseline:[
+      {l:"Context", then:"IPO Dec-2021; not in 2023 IE report", now:"FY25 rev Rp8.1tn, NP Rp1.74tn"},
+      {l:"Strategy", then:"established market leader", now:"trading margin for volume / share"}
+    ],
+    questions:[
+      {theme:"Demand, share & mix", items:[
+        {q:"Decorative-paint volume vs ASP growth, and the market-share trajectory vs Nippon / Mowilex / Propan?"},
+        {q:"Distribution depth / store additions — rural vs urban, and ex-Java penetration?"},
+        {q:"Adhesives, sealants and building-materials mix — growth and margin vs core paint?"}
+      ]},
+      {theme:"Costs, margin & capital", items:[
+        {q:"TiO2 / resin / packaging input costs — passthrough lag and gross-margin outlook?", base:"share-gain strategy cut margin ~2%"},
+        {q:"Cirebon factory ramp; capacity utilisation; any new categories or M&A?"},
+        {q:"Capital allocation on net cash — dividend, buyback, reinvestment hurdle?"}
+      ]}
+    ],
+    observe:[]
+  },
+  {
+    id:"wiim", name:"Wismilak", ticker:"WIIM IJ", listed:true,
+    day:3, time:"15:00–16:30", kind:"corp",
+    location:"Wismilak Inti Makmur, Tandes, Surabaya · meet Pak Surjanto",
+    positioning:"Corporate call — kretek maker. Down-trading share winner; the no-CHT-hike 2026 decision is the live catalyst.",
+    oneQ:"Excise (cukai) — how do the flat-2026 CHT and the proposed new tier hit volume, mix and margin?",
+    snapshot:{
+      cols:["FY24","FY25","1Q26"],
+      rows:[
+        {l:"Revenue", v:["4,750","~6,300","1,610"], n:"FY25 TTM est; 1Q26 +18.3%"},
+        {l:"Net profit", v:["298.7","419.2","148"], n:"FY24 −39.6%; FY25 +40.4%; 1Q26 +103%"},
+        {l:"Net margin", v:["~6%","~7%","9.2%"], n:"down-trading lift"}
+      ]
+    },
+    valuation:[
+      {l:"Share price", v:"~Rp1,955", verify:true},
+      {l:"Shares (m)", v:"~2,084"},
+      {l:"Market cap", v:"~Rp4.1tn"},
+      {l:"1-yr return", v:"~+220%"},
+      {l:"Dividend FY25", v:"Rp104.4/sh"},
+      {l:"Yield", v:"~6.1%"}
+    ],
+    balance:"FY24 total assets Rp3tn (+17.5%). Dividend FY25 Rp217.9bn (payout ~52%). Family-controlled, lightly geared.",
+    holders:"Surjanto / Surjaputra family.",
+    facts:[
+      "Products: SKT hand-rolled (Galan, Wismilak), SKM machine-rolled (Diplomat, Diplomat Mild/Evo), cigars, filter rods, OPP packaging.",
+      "FY24 mix: SKM Rp2.66tn, filter Rp1.15tn.",
+      "Down-trading beneficiary — gaining share from larger players; 1Q26 net profit doubled (+103%) on SKM-led net-sales growth."
+    ],
+    baseline:[
+      {l:"Earnings", then:"FY24 NP −39.6%", now:"FY25 +40.4%, 1Q26 +103%"},
+      {l:"Excise", then:"CHT hikes pressured volume", now:"flat 2025; NO hike in 2026"}
+    ],
+    catalyst:"2026 catalyst — Finance Minister Purbaya decided NOT to raise tobacco excise (CHT) in 2026 (flat, as in 2025). 2026 CHT revenue target Rp225.73tn (−1.89%). A proposed new excise tier between SKT and SKM is under parliament discussion — a medium-term risk to the tier-disparity advantage.",
+    questions:[
+      {theme:"Volume, mix & excise", items:[
+        {q:"The no-hike 2026 CHT decision — impact on volume, pricing power and tier arbitrage? And risk from the proposed new tier?", base:"2026 CHT flat; new tier under discussion"},
+        {q:"SKT vs SKM mix and where share is being won during down-trading?"},
+        {q:"Distribution reach, and cigar / export contribution?"}
+      ]},
+      {theme:"Margin & capital", items:[
+        {q:"Gross-margin outlook given flat excise plus tobacco / clove input costs?"},
+        {q:"Dividend-policy sustainability and capex needs?"}
+      ]}
+    ],
+    observe:[]
+  },
+  {
+    id:"pwon", name:"Pakuwon City Mall", ticker:"PWON IJ", listed:true,
+    day:3, time:"17:30–19:00", kind:"corp",
+    location:"Pakuwon City Mall, Mulyorejo, Surabaya",
+    positioning:"Corporate call — superblock + retail + hotel developer. Recurring engine robust; residential soft.",
+    oneQ:"Recurring engine — mall occupancy, rental reversion and tenant-sales trend across the portfolio?",
+    snapshot:{
+      cols:["FY24","FY25"],
+      rows:[
+        {l:"Revenue", v:["6,670","7,110"], n:"+7%"},
+        {l:"Gross profit", v:["3,770","3,940"], n:"GM 55.5%"},
+        {l:"EBITDA", v:["3,580","3,710"], n:"margin 52.1%"},
+        {l:"Net profit (owners)", v:["2,070","2,350"], n:"+13.1%; EPS 48.7; NPM 33%"},
+        {l:"Recurring revenue", v:["–","5,620"], n:"+8%, ~79% of total"},
+        {l:"Marketing sales", v:["–","1,300"], n:"−16.3% (soft housing)"}
+      ]
+    },
+    valuation:[
+      {l:"Share price", v:"~Rp282", verify:true},
+      {l:"Shares (bn)", v:"~48.2"},
+      {l:"Market cap", v:"~Rp14tn"},
+      {l:"P/E", v:"~6.85x"},
+      {l:"P/B", v:"~0.72x"},
+      {l:"Dividend", v:"Rp13/sh (~4.5%)"}
+    ],
+    balance:"FY25: total assets Rp36.46tn · liabilities Rp9.84tn (−7.4%, bond tender) · equity Rp26.62tn · cash Rp5.18tn. Net cash. Capex FY25 Rp1.21tn.",
+    holders:"Tedja family / Pakuwon Arthaniaga.",
+    facts:[
+      "Portfolio: Tunjungan Plaza, Pakuwon Mall Surabaya, Kota Kasablanka, Pakuwon City Mall, Gandaria City, Blok M Plaza, Pakuwon Mall Bekasi.",
+      "Recurring revenue Rp5.62tn (~79%): retail leasing Rp3.93tn (+14%), hotel Rp1.42tn (+2%), office Rp273bn (−26%).",
+      "Mall occupancy ~95%, estimated WALE ~3.2 years.",
+      "Three hotels opened FY25 (Fairfield Bekasi, Aloft Surabaya, Four Points Bekasi); Park Shanghai opened Jul-2025.",
+      "Pipeline: Bekasi superblock, Pakuwon City Mall Ph3, Pakuwon Mall Surabaya Ph5, Pakuwon Mall Semarang (~2029), Kota Kasablanka Ph4, Gandaria City Ph2."
+    ],
+    baseline:[
+      {l:"Context", then:"recurring-income superblock pioneer", now:"FY25 ~79% recurring, NP Rp2.35tn"},
+      {l:"Residential", then:"steady pre-sales", now:"FY25 marketing sales −16.3%"}
+    ],
+    questions:[
+      {theme:"Recurring (malls + hotels)", items:[
+        {q:"Occupancy, rental-reversion and tenant-sales growth across the key malls?"},
+        {q:"Hotel RevPAR / occupancy recovery and outlook?"},
+        {q:"Recurring vs development revenue mix and the steady-state target?", base:"FY25 ~79% recurring"}
+      ]},
+      {theme:"Development & capital", items:[
+        {q:"New projects (Bekasi, Semarang, Bali) — timeline, capex and pre-sales?"},
+        {q:"Condo / strata marketing-sales run-rate?", base:"FY25 −16.3%"},
+        {q:"Net-cash capital allocation — landbank, dividend, buyback?"}
+      ]}
+    ],
+    observe:["Mall foot-traffic and tenant occupancy on a Thursday evening.","Vacant lots / signage vs trading units."]
+  },
+  // ---------------- DAY 4 ----------------
+  {
+    id:"jiipe", name:"JIIPE (KEK Gresik)", ticker:"AKRA IJ", listed:true,
+    day:4, time:"09:00–12:00", kind:"estate",
+    location:"Berkah Kawasan Manyar Sejahtera, Manyar-Gresik",
+    positioning:"Inside AKRA (industrial-estate segment). Best-performing group; JIIPE utilities ramping hard, Freeport anchor.",
+    oneQ:"How is the 515MW → 1.0–1.3GW power gap funded and timed — captive or PLN?",
+    snapshot:{
+      cols:["FY24","FY25","1Q26"],
+      rows:[
+        {l:"Group revenue", v:["38,730","46,020","12,941"], n:"1Q26 +26% YoY"},
+        {l:"Group EBITDA", v:["–","3,674","–"], n:"net gearing −0.08x"},
+        {l:"Group net profit", v:["~2,228","2,473","656"], n:"FY25 +11%; 1Q26 +16% YoY, −20% QoQ"},
+        {l:"JIIPE segment rev", v:["~1,378","2,742","638.6"], n:"FY25 +99%; 1Q26 vs 235.3"},
+        {l:"JIIPE land sales", v:["–","–","373"], n:"1Q26 = 17ha handed over (vs 0)"}
+      ]
+    },
+    valuation:[
+      {l:"Share price", v:"~Rp1,345", verify:true},
+      {l:"Shares (m)", v:"20,074"},
+      {l:"Market cap", v:"~Rp27tn"},
+      {l:"P/E", v:"~11.2x"},
+      {l:"P/B", v:"~2.3x"},
+      {l:"Yield", v:"~7% (DPR 88%)"}
+    ],
+    balance:"FY25 net cash (gearing −0.08x); ROE 20%. 1Q26 current ratio 1.45x; EPS Rp33.25. Clean JIIPE read needs sum-of-parts vs the trading core.",
+    holders:"Arthakencana Rayatama (Adikoesoemo) 63.7% · foreign ~22% · domestic ~13% · treasury ~1.4%.",
+    facts:[
+      "Masterplan 3,000ha: industrial 1,761ha, port ~406ha, residential/commercial 800ha; KEK area 2,167ha.",
+      "Power ~515MW gas licensed + 400kWp rooftop solar; est. demand at full build 1.0–1.3GW; future floating solar 150MW + LNG terminal JV with bp.",
+      "Deep-sea port: 14–16m draft, ~8km coast, ~10mn t/yr; Pelindo JV (port 40/60; BKMS utilities 60/40).",
+      "Anchor: Freeport copper smelter — world's largest single-line, US$3.67bn, 600k t Cu/yr; offtakers Hailiang (copper), ANTAM (35–50t gold), 1.8mn t sulphuric acid.",
+      "2nd anchor: Xinyi Glass/Solar (US$700m, 98.5ha). Chemical cluster: Hebang (soda ash), Golden Elephant (melamine/nitric), Clariant.",
+      "JIIPE KEK total investment target Rp237.86tn."
+    ],
+    baseline:[
+      {l:"JIIPE utility revenue (1H)", then:"Rp16bn (2020) → 75bn (2024)", now:"Rp311bn 1H25 (+317%)"},
+      {l:"Tenants", then:"17 tenants (2023)", now:"Freeport operating; chemical + glass clusters"},
+      {l:"Power", then:"23MW phase-1 (2023)", now:"515MW licensed vs 1.0–1.3GW demand"}
+    ],
+    questions:[
+      {theme:"A · Power — the gating item", items:[
+        {q:"515MW licensed vs 1.0–1.3GW demand — how is the gap funded and timed (captive vs PLN), and capex?", base:"515MW vs 1.0–1.3GW"},
+        {q:"Floating solar 150MW and the bp LNG terminal — where in the FID / construction cycle?"}
+      ]},
+      {theme:"B · Freeport anchor & concentration", items:[
+        {q:"How much utility / port volume is tied to Freeport, and how do you think about that concentration?"},
+        {q:"Pull-through from offtakers (Hailiang, ANTAM) into land / power / port revenue?"},
+        {q:"Next wave of anchor-scale tenants beyond Xinyi and the chemical cluster?"}
+      ]},
+      {theme:"C · Recurring ramp & structure", items:[
+        {q:"Utility +317% to Rp311bn 1H25 (JIIPE segment Rp638.6bn in 1Q26) — steady run-rate vs commissioning one-offs, and margin?", base:"1H25 +317%"},
+        {q:"JIIPE ~19% of group GP — how should we value it sum-of-parts vs the trading core?"},
+        {q:"BKMS 60/40 and port 40/60 with Pelindo — how do economics and governance split?"}
+      ]}
+    ],
+    observe:["Smelter commissioning / Freeport activity visible from site.","Port draft & vessel activity; substation build vs the licensed 515MW."]
+  }
+];
+
+/* ---------- helpers ---------- */
+const $=(s,r=document)=>r.querySelector(s);
+const el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;};
+const esc=s=>String(s).replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]));
+const dayClr=["","d1","d2","d3","d4"];
+const dayHex=["","#C8102E","#B5651D","#3E6B8C","#3F7A55"];
+const store={
+  get(k){try{return localStorage.getItem(k)||""}catch(e){return (this._m&&this._m[k])||""}},
+  set(k,v){try{localStorage.setItem(k,v)}catch(e){(this._m=this._m||{})[k]=v}},
+  keys(){try{return Object.keys(localStorage)}catch(e){return Object.keys(this._m||{})}},
+  del(k){try{localStorage.removeItem(k)}catch(e){if(this._m)delete this._m[k]}}
+};
+const noteKey=(eid,ti,qi)=>`viv:${eid}:${ti}:${qi}`;
+
+/* ---------- header ---------- */
+$('#h1').textContent=TRIP.title;
+$('#hsub').textContent=TRIP.sub;
+$('#hanalysts').textContent=TRIP.analysts;
+$('#hmaster').textContent=TRIP.master;
+
+/* ---------- tabs ---------- */
+const tabsEl=$('#tabs');
+const ovTab=el('button','tab ov');ovTab.setAttribute('role','tab');ovTab.dataset.t='overview';
+ovTab.innerHTML=`<span class="dlab">Tour</span><span class="tname">Overview</span><span class="tmeta">spine + lens</span>`;
+tabsEl.appendChild(ovTab);
+ENTITIES.forEach(e=>{
+  const b=el('button','tab');b.setAttribute('role','tab');b.dataset.t=e.id;
+  b.innerHTML=`<span class="dlab"><span class="dtick ${dayClr[e.day]}"></span>Day ${e.day}</span>
+    <span class="tname">${esc(e.name)}</span>
+    <span class="tmeta">${esc(e.ticker.split(' ')[0])} · ${esc(e.time.split('–')[0])}</span>`;
+  tabsEl.appendChild(b);
+});
+
+/* ---------- renderers ---------- */
+function finTable(s){
+  const t=el('table','ftab');
+  const thead=el('thead');const hr=el('tr');hr.appendChild(el('th',null,'IDR bn'));
+  s.cols.forEach(c=>hr.appendChild(el('th',null,esc(c))));thead.appendChild(hr);t.appendChild(thead);
+  const tb=el('tbody');
+  s.rows.forEach(r=>{
+    const tr=el('tr');
+    const td0=el('td','l');td0.innerHTML=esc(r.l)+(r.n?`<div class="rnote">${esc(r.n)}</div>`:'');tr.appendChild(td0);
+    r.v.forEach((v,i)=>{
+      const last=i===r.v.length-1;
+      const neg=/^[−-]/.test(v);
+      const td=el('td','num'+(last?' last':'')+(neg?' neg':''));td.textContent=v;tr.appendChild(td);
+    });
+    tb.appendChild(tr);
+  });
+  t.appendChild(tb);return t;
+}
+function valGrid(v){
+  const g=el('div','vgrid');
+  v.forEach(c=>{
+    const d=el('div','vcell'+(c.verify?' verify':''));
+    d.innerHTML=`<div class="vl">${esc(c.l)}</div><div class="vv">${esc(c.v)}</div>`;
+    g.appendChild(d);
+  });
+  return g;
+}
+function baselineTable(b){
+  const w=el('div','bn');
+  w.appendChild(el('div','bh',''));
+  w.appendChild(el('div','bh','2023 baseline'));
+  w.appendChild(el('div','bh x','2026 / now'));
+  b.forEach(r=>{
+    w.appendChild(el('div','bl',esc(r.l)));
+    w.appendChild(el('div','bt',esc(r.then)));
+    w.appendChild(el('div','bnow',esc(r.now)));
+  });
+  return w;
+}
+
+function buildEntity(e){
+  const p=el('section','panel');p.id='p-'+e.id;p.setAttribute('role','tabpanel');
+
+  // header
+  const h=el('div','ehead'+(e.kind==='corp'?' k-corp':''));
+  const top=el('div','etop');
+  top.appendChild(el('h2','ename',esc(e.name)));
+  top.appendChild(el('span','ticker'+(e.listed?'':' unl'),esc(e.ticker)));
+  top.appendChild(el('span','pill'+(e.kind==='corp'?' corp':''),e.kind==='corp'?'corporate call':'industrial estate'));
+  h.appendChild(top);
+  h.appendChild(el('div','eloc',`<b>Day ${e.day}</b> · ${esc(e.time)} · ${esc(e.location)}`));
+  h.appendChild(el('div','epos',esc(e.positioning)));
+  const oq=el('div','oneq');oq.innerHTML=`<div class="eyebrow">The one question</div><p>${esc(e.oneQ)}</p>`;
+  h.appendChild(oq);
+  p.appendChild(h);
+
+  // sub-nav
+  const sub=el('div','subnav');
+  const sects=[['snap','Snapshot'],['facts','Facts'],['base','2023 → now'],['q','Questions']];
+  sects.forEach((s,i)=>{
+    const b=el('button','subbtn',s[1]);b.setAttribute('role','tab');b.dataset.b=s[0];
+    if(i===0)b.setAttribute('aria-selected','true');
+    sub.appendChild(b);
+  });
+  p.appendChild(sub);
+
+  // SNAPSHOT block
+  const snap=el('div','block show');snap.dataset.block='snap';
+  if(e.caveat)snap.appendChild(el('div','caveat',`<b>Verify on site:</b> ${esc(e.caveat)}`));
+  const g2=el('div','grid2');
+  const cF=el('div','card');cF.appendChild(el('h3',null,'Financial snapshot'));cF.appendChild(finTable(e.snapshot));
+  if(e.balance)cF.appendChild(el('div','meta-line',`<b>Balance sheet.</b> ${esc(e.balance)}`));
+  g2.appendChild(cF);
+  const cV=el('div','card');cV.appendChild(el('h3',null,'Valuation & ownership'));cV.appendChild(valGrid(e.valuation));
+  cV.appendChild(el('div','meta-line hold',`<b>Shareholders.</b> ${esc(e.holders)}`));
+  g2.appendChild(cV);
+  snap.appendChild(g2);
+  p.appendChild(snap);
+
+  // FACTS block
+  const facts=el('div','block');facts.dataset.block='facts';
+  const cFacts=el('div','card');cFacts.appendChild(el('h3',null,'Operational facts — 2026'));
+  const ul=el('ul','facts');e.facts.forEach(f=>ul.appendChild(el('li',null,esc(f))));cFacts.appendChild(ul);
+  facts.appendChild(cFacts);
+  if(e.observe&&e.observe.length){
+    const ob=el('div','observe');ob.innerHTML=`<div class="eyebrow">Observe on the ground</div>`;
+    const oul=el('ul');e.observe.forEach(o=>oul.appendChild(el('li',null,esc(o))));ob.appendChild(oul);
+    facts.appendChild(ob);
+  }
+  p.appendChild(facts);
+
+  // BASELINE block
+  const base=el('div','block');base.dataset.block='base';
+  const cB=el('div','card');cB.appendChild(el('h3',null,'2023 baseline → 2026 reality'));
+  cB.appendChild(baselineTable(e.baseline));
+  base.appendChild(cB);
+  p.appendChild(base);
+
+  // QUESTIONS block
+  const qb=el('div','block');qb.dataset.block='q';
+  if(e.catalyst){const cat=el('div','catalyst');cat.innerHTML=`<div class="eyebrow">Live catalyst</div>${esc(e.catalyst)}`;qb.appendChild(cat);}
+  const cQ=el('div','card');cQ.appendChild(el('h3',null,'2026 question bank'));
+  let qIndex=0;
+  e.questions.forEach((grp,ti)=>{
+    cQ.appendChild(el('div','qtheme',esc(grp.theme)));
+    grp.items.forEach((it,ii)=>{
+      qIndex++;
+      const item=el('div','qitem');
+      const key=noteKey(e.id,ti,ii);
+      const saved=store.get(key);
+      if(saved)item.classList.add('hasnote');
+      const row=el('div','qrow');row.setAttribute('role','button');row.setAttribute('tabindex','0');row.setAttribute('aria-expanded', saved?'true':'false');
+      row.innerHTML=`<span class="qnum">${qIndex}</span>
+        <span class="qtext">${esc(it.q)}${it.base?`<br><span class="qbase">baseline: ${esc(it.base)}</span>`:''}</span>
+        <span class="savedot" title="captured"></span>
+        <span class="chev">▸</span>`;
+      const cap=el('div','qcap'+(saved?' open':''));
+      cap.innerHTML=`<div class="clabel">Capture answer / follow-up</div>`;
+      const ta=el('textarea');ta.value=saved;ta.placeholder='Type management\u2019s answer\u2026';ta.dataset.key=key;
+      ta.addEventListener('input',()=>{
+        const v=ta.value.trim();
+        if(v){store.set(key,ta.value);item.classList.add('hasnote');}
+        else{store.del(key);item.classList.remove('hasnote');}
+      });
+      cap.appendChild(ta);
+      const toggle=()=>{const open=cap.classList.toggle('open');row.setAttribute('aria-expanded',open?'true':'false');if(open)setTimeout(()=>ta.focus(),50);};
+      row.addEventListener('click',toggle);
+      row.addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();toggle();}});
+      item.appendChild(row);item.appendChild(cap);cQ.appendChild(item);
+    });
+  });
+  qb.appendChild(cQ);
+  p.appendChild(qb);
+
+  // sub-nav switching
+  sub.addEventListener('click',ev=>{
+    const b=ev.target.closest('.subbtn');if(!b)return;
+    sub.querySelectorAll('.subbtn').forEach(x=>x.setAttribute('aria-selected','false'));
+    b.setAttribute('aria-selected','true');
+    p.querySelectorAll('.block').forEach(x=>x.classList.toggle('show',x.dataset.block===b.dataset.b));
+  });
+
+  return p;
+}
+
+/* ---------- overview ---------- */
+function buildOverview(){
+  const p=el('section','panel');p.id='p-overview';p.setAttribute('role','tabpanel');
+
+  const tb=el('div','toolbar');
+  tb.innerHTML=`<button class="btn primary" id="exportBtn">Export captured notes</button>
+    <button class="btn" id="clearBtn">Clear all notes</button>
+    <span class="tbnote" id="noteCount"></span>`;
+  p.appendChild(tb);
+
+  p.appendChild(el('div','ovhead','Tour spine — eight stops, one comparative read'));
+  const tbl=el('table','spine');
+  tbl.innerHTML=`<thead><tr><th>Stop</th><th>Day</th><th>Latest read (FY25 / 1Q26)</th><th>The one question</th></tr></thead>`;
+  const body=el('tbody');
+  ENTITIES.forEach(e=>{
+    const tr=el('tr');
+    const nm=el('td');nm.innerHTML=`<span class="snm" data-go="${e.id}">${esc(e.name)}</span><span class="stk">${esc(e.ticker)}</span>`;
+    const dc=el('td');dc.innerHTML=`<span class="daychip" style="background:${dayHex[e.day]}">D${e.day} · ${esc(e.time.split('–')[0])}</span>`;
+    const rd=el('td','shead');rd.innerHTML=esc(spineRead(e));
+    const oq=el('td');oq.innerHTML=`<span class="soneq">${esc(e.oneQ)}</span>`;
+    tr.append(nm,dc,rd,oq);body.appendChild(tr);
+  });
+  tbl.appendChild(body);p.appendChild(tbl);
+
+  p.appendChild(el('div','ovhead','The lens — apply at every stop'));
+  const fw=el('div','ovgrid');
+  FRAMEWORK.forEach(([head,items])=>{
+    const c=el('div','fwcard');c.innerHTML=`<h4>${esc(head)}</h4>`;
+    const ul=el('ul');items.forEach(i=>ul.appendChild(el('li',null,esc(i))));c.appendChild(ul);fw.appendChild(c);
+  });
+  p.appendChild(fw);
+
+  const obc=el('div','observe');
+  obc.innerHTML=`<div class="eyebrow">Observe — don\u2019t just ask</div>
+    <ul><li>Roads / utilities built, or just graded?</li>
+    <li>Factories actually running — trucks, cars, smoke — or show-tenant only?</li>
+    <li>Is the \u201c15-minute toll\u201d really 15 minutes? Count the trucks — the ground can\u2019t be rehearsed.</li>
+    <li><b>Close every meeting:</b> what does the market misunderstand here? · what in 12 months proves the thesis wrong?</li></ul>`;
+  p.appendChild(obc);
+
+  return p;
+}
+function spineRead(e){
+  const m={
+    kija:"FY25 sales Rp3.6tn (record, beat target); 1Q26 net profit Rp164bn, softer on lower matured-land sales.",
+    best:"FY25 net profit just Rp30bn; 1H25 net loss Rp59bn. Warehouse 100% occupied; ~70ha demand pipeline.",
+    kitb:"KEK since Mar-2025; ~Rp22.5tn committed across 35+ tenants (8 operating). Financials unverified.",
+    kendal:"FY25 Rp2.51tn / 142ha (~70% of KIJA, ~89% foreign). FY26 target Rp2.5tn.",
+    avia:"FY25 rev Rp8.1tn (+8.7%), NP Rp1.74tn, vol +7.4%. Net cash, 78% payout. Cirebon plant ramping.",
+    wiim:"FY25 NP Rp419bn (+40%); 1Q26 +103%. No CHT hike in 2026 — down-trading winner.",
+    pwon:"FY25 rev Rp7.1tn (+7%), NP Rp2.35tn (+13%); recurring ~79%. Residential pre-sales −16%.",
+    jiipe:"AKRA FY25 NP Rp2.47tn (+11%), net cash; JIIPE segment rev +99%. Freeport anchor; power gap to fund."
+  };
+  return m[e.id]||"";
+}
+
+/* ---------- mount ---------- */
+const main=$('#main');
+main.appendChild(buildOverview());
+ENTITIES.forEach(e=>main.appendChild(buildEntity(e)));
+
+/* ---------- tab switching ---------- */
+function selectTab(id){
+  tabsEl.querySelectorAll('.tab').forEach(t=>t.setAttribute('aria-selected', t.dataset.t===id?'true':'false'));
+  main.querySelectorAll('.panel').forEach(pp=>pp.classList.toggle('active', pp.id==='p-'+id));
+  updateCount();
+  window.scrollTo({top:0,behavior:'instant' in window?'instant':'auto'});
+}
+tabsEl.addEventListener('click',ev=>{const t=ev.target.closest('.tab');if(t)selectTab(t.dataset.t);});
+main.addEventListener('click',ev=>{const g=ev.target.closest('[data-go]');if(g)selectTab(g.dataset.go);});
+selectTab('overview');
+
+/* ---------- notes export / clear ---------- */
+function updateCount(){
+  const n=store.keys().filter(k=>k.startsWith('viv:')&&store.get(k).trim()).length;
+  const c=$('#noteCount');if(c)c.textContent=n?`${n} answer${n>1?'s':''} captured`:'no notes captured yet';
+}
+function entityById(id){return ENTITIES.find(e=>e.id===id);}
+function exportNotes(){
+  const keys=store.keys().filter(k=>k.startsWith('viv:')&&store.get(k).trim());
+  if(!keys.length){alert('No captured notes yet.');return;}
+  let md=`# Java IE tour — captured notes\n${TRIP.sub}\n\n`;
+  ENTITIES.forEach(e=>{
+    const lines=[];let qn=0;
+    e.questions.forEach((grp,ti)=>grp.items.forEach((it,ii)=>{
+      qn++;const v=store.get(noteKey(e.id,ti,ii));
+      if(v&&v.trim())lines.push(`**Q${qn}.** ${it.q}\n> ${v.trim().replace(/\n/g,'\n> ')}`);
+    }));
+    if(lines.length)md+=`## ${e.name} (${e.ticker}) — Day ${e.day}\n\n`+lines.join('\n\n')+'\n\n';
+  });
+  const blob=new Blob([md],{type:'text/markdown'});
+  const a=el('a');a.href=URL.createObjectURL(blob);a.download='IE_tour_notes_260612.md';
+  document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(a.href);
+}
+document.addEventListener('click',ev=>{
+  if(ev.target.id==='exportBtn')exportNotes();
+  if(ev.target.id==='clearBtn'){
+    if(confirm('Clear all captured notes on this device? Export first if you need them.')){
+      store.keys().filter(k=>k.startsWith('viv:')).forEach(k=>store.del(k));
+      document.querySelectorAll('.qcap textarea').forEach(t=>{t.value='';});
+      document.querySelectorAll('.qitem.hasnote').forEach(i=>i.classList.remove('hasnote'));
+      updateCount();
+    }
+  }
+});
+updateCount();
+</script>
+</body>
+</html>
